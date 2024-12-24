@@ -4,8 +4,8 @@ const pool = new Pool({
   user: "bijunzhao",
   host: "localhost",
   database: "arrowhead_user_master",
-  password: "woaibobo21",
-  port: 5432,
+  password: "samplepassword",
+  port: 1234,
 });
 
 pool.connect((err, client, release) => {

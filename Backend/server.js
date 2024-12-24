@@ -17,8 +17,6 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.post("/api/users", async (req, res) => {
   const users = req.body;
 
-  // console.log("Received data:", req.body);
-
   const query = `
     INSERT INTO users (
       name, username, email, street, suite, city, zipcode, latitude, longitude,
@@ -56,14 +54,21 @@ app.post("/api/users", async (req, res) => {
   }
 });
 
-// app.listen(PORT, async (err) => {
-//   if (err) throw error;
-//   console.log(`Server running on port ${PORT}`.rainbow);
-//   await createUsersTable();
-// });
-
-//sort by names
+//get all users from db
 app.get("/api/users", async (req, res) => {
+  const query = `
+    SELECT * FROM users;
+  `;
+  try {
+    const result = await pool.query(query);
+    res.status(200).json(result.rows);
+  } catch (error) {
+    console.error(error.stack);
+    res.status(500).send("Failed to fetch users");
+  }
+});
+//sort by names
+app.get("/api/users/sort", async (req, res) => {
   const query = `
     SELECT * FROM users ORDER BY name ASC;
   `;
@@ -98,16 +103,13 @@ app.put("/api/user/:id", async (req, res) => {
 });
 // Filter users by longitude
 app.get("/api/users/filter", async (req, res) => {
-     console.log(req.query);
-     
-  const { longitude } = req.query;
   const query = `
    SELECT * FROM users
-   WHERE longitude > $1;
+   WHERE longitude > -110.455;
   `;
   try {
- 
-    const result = await pool.query(query, [longitude]);
+    const result = await pool.query(query);
+    console.log("filter result", result.rows);
     res.status(200).json(result.rows);
   } catch (error) {
     console.error(error.stack);
