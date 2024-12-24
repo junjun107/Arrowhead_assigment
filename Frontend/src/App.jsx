@@ -1,50 +1,62 @@
 import { useEffect, useState } from "react";
-import reactLogo from "./assets/react.svg";
-import viteLogo from "/vite.svg";
 import "./App.css";
 import axios from "axios";
-import UserProfile from "./UserProfile";
 
+
+const API_URL = "http://localhost:5001/api/users";
 function App() {
-  const [count, setCount] = useState(0);
-  const [userData, setUserData] = useState("");
+  const [userData, setUserData] = useState([]);
 
   useEffect(() => {
-    axios
-      .get("https://jsonplaceholder.typicode.com/users")
-      .then((res) => setUserData(res.data));
+    const fetchUsers = async () => {
+      try {
+        const res = await axios.get(
+          "https://jsonplaceholder.typicode.com/users"
+        );
+        setUserData(res.data);
+        await sendUsersToBackend(res.data);
+      } catch (error) {
+        console.error("Error fetching data", error);
+      }
+    };
+
+    const sendUsersToBackend = async (data) => {
+      try {
+        await axios.post(API_URL, data);
+        console.log("Data sent to the backend successfully!");
+      } catch (error) {
+        console.error("Error sending data to the backend", error);
+      }
+    };
+    fetchUsers();
   }, []);
 
-  console.log(userData);
   return (
-    <>
+    <div>
       <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
+        {userData &&
+          userData.map((user) => (
+            <div key={user.id} style={{ marginBottom: "20px" }}>
+              <h2>{user.name}</h2>
+              <p>Username: {user.username}</p>
+              <p>Email: {user.email}</p>
+              <p>
+                Address: {user.address.street},{user.address.suite},
+                {user.address.city}, {user.address.zipcode}
+              </p>
+              <p>
+                Geo: {user.address.geo.lat},{user.address.geo.lng}
+              </p>
+              <p>Phone: {user.phone}</p>
+              <p>Website: {user.website}</p>
+              <p>
+                Company: {user.company.name},{user.company.catchPhrase},
+                {user.company.bs}
+              </p>
+            </div>
+          ))}
       </div>
-      <h1>HELLO Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.jsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-
-      <div className="card">
-        {userData && userData.map((user) => (
-          <div key={user.id}>{user.name}</div>
-        ))}
-      </div>
-    </>
+    </div>
   );
 }
 
